@@ -1,0 +1,86 @@
+## This script computes the relative error in the inferred number of entities 
+## (number of clusters) under four different priors on the linkage structure. 
+## A point estimate of the error is computed using the posterior median, 
+## as well as 95% equi-tailed credible intervals.
+## 
+## Outputs:
+##   * `plot_err-num-ents_comparison.pdf`: A plot visualizing the results.
+
+library(tidyverse)
+library(exchanger) 
+library(tidybayes)       # provides geom_pointinterval
+library(egg)             # provides ggarange
+library(coda)            # for manipulating 'mcmc' objects
+source("util.R")         # contains definition of "get_result_rds"
+
+expts <- list(
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),
+  list(data.name = "cora", path = get_result_rds("cora_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),
+  list(data.name = "rest", path = get_result_rds("restaurant_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_py"), prior = "PY", dist.model = "Ours"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_ours_py"), prior = "PY", dist.model = "Ours"),
+  list(data.name = "cora", path = get_result_rds("cora_ours_py"), prior = "PY", dist.model = "Ours"),
+  list(data.name = "rest", path = get_result_rds("restaurant_ours_py"), prior = "PY", dist.model = "Ours"),
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_ewens"), prior = "Ewens", dist.model = "Ours"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_ours_ewens"), prior = "Ewens", dist.model = "Ours"),
+  list(data.name = "cora", path = get_result_rds("cora_ours_ewens"), prior = "Ewens", dist.model = "Ours"),
+  list(data.name = "rest", path = get_result_rds("restaurant_ours_ewens"), prior = "Ewens", dist.model = "Ours"),
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_blinkcoupon"), prior = "Coupon", dist.model = "Ours"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_ours_blinkcoupon"), prior = "Coupon", dist.model = "Ours"),
+  list(data.name = "cora", path = get_result_rds("cora_ours_blinkcoupon"), prior = "Coupon", dist.model = "Ours"),
+  list(data.name = "rest", path = get_result_rds("restaurant_ours_blinkcoupon"), prior = "Coupon", dist.model = "Ours")
+)
+
+true.num.ents <- list(
+  "RLdata" = {
+    records <- read_csv("datasets/RLdata10000.csv.gz")
+    length(unique(records$ent_id))
+  }, 
+  "cora" = {
+    records <- read_csv("datasets/cora.arff.gz", skip = 18, 
+                        col_names = c("authors", "volume", "title", "institution", 
+                                      "venue", "address", "publisher", "year", 
+                                      "pages", "editor", "note", "month", "UID"))
+    length(unique(records$UID))
+  },
+  "nltcs" = {
+    records <- read_csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
+    length(unique(records$SEQ))
+  },
+  "rest" = {
+    records <- read_csv("datasets/fz-nophone.arff.gz", skip = 10, 
+                        col_names = c("name", "addr", "city", "type", "UID"))
+    length(unique(records$UID))
+  }
+)
+
+theme_set(theme_bw())# + theme(text = element_text(size = 8)))
+
+plt.width <- 3.2621875
+plt.height <- 0.45 * plt.width
+
+results <- lapply(expts, function(expt) {
+  result <- tryCatch(readRDS(expt$path), error = function(e) NULL)
+  if (is.null(result)) return(NULL)
+  data.name <- expt$data.name
+  prior <- expt$prior
+  num.ents <- true.num.ents[[data.name]]
+  tibble(err.num.ents = 100*(as.vector(result@history$n_linked_ents) - num.ents)/num.ents, 
+         data.name = data.name, 
+         prior = prior)
+})
+
+results <- bind_rows(results)
+results$prior <- factor(results$prior, c("PY", "Ewens", "GenCoupon", "Coupon"))
+results$data.name <- factor(results$data.name, c("RLdata", "nltcs", "cora", "rest"))
+
+results %>% 
+  group_by(data.name, prior) %>% 
+  point_interval(.interval = qi) %>%
+  ggplot(aes(y = data.name, x = err.num.ents, xmin = .lower, xmax = .upper, color=prior)) + 
+  geom_pointinterval(interval_size = 0.5, point_size = 0.5, position=position_dodge(-0.7)) +  
+  scale_y_discrete(limits=rev) +
+  labs(y = "Data set", x = "Relative error (%)", color = "Prior") + 
+  theme(legend.position="top", legend.margin=margin())
+ggsave("plot_err-num-ents_comparison.pdf", width = plt.width, height = plt.height, scale=1.4)

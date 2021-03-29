@@ -1,0 +1,119 @@
+## This script computes pairwise evaluation metrics for our model (under the 
+## generalized coupon prior) + baseline models by Steorts (2015) and Sadinle 
+## (2014).
+## A point estimate for each metric is computed using the posterior median, 
+## as well as 95% equi-tailed credible intervals.
+## 
+## Outputs:
+##   * `evaluate_models.csv`: A CSV file containing the results
+##   * `plot_models.pdf`: A plot visualizing the results
+
+library(tidyverse)
+library(exchanger) 
+library(clevr)
+library(tidybayes)       # provides geom_pointinterval
+library(egg)             # provides ggarange
+library(coda)            # for manipulating 'mcmc' objects
+library(future)
+library(future.apply)    # parallelization
+source("util.R")         # contains definition of "get_result_rds"
+
+expts <- list(
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_blink"), model = "blink"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_blink"), model = "blink"),
+  list(data.name = "cora", path = get_result_rds("cora_blink"), model = "blink"),
+  list(data.name = "rest", path = get_result_rds("restaurant_blink"), model = "blink"),
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_sadinle"), model = "Sadinle"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_sadinle"), model = "Sadinle"),
+  list(data.name = "cora", path = get_result_rds("cora_sadinle"), model = "Sadinle"),
+  list(data.name = "rest", path = get_result_rds("restaurant_sadinle"), model = "Sadinle"),
+  list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_coupon"), model = "Ours"),
+  list(data.name = "nltcs", path = get_result_rds("nltcs_ours_coupon"), model = "Ours"),
+  list(data.name = "cora", path = get_result_rds("cora_ours_coupon"), model = "Ours"),
+  list(data.name = "rest", path = get_result_rds("restaurant_ours_coupon"), model = "Ours")
+)
+
+true_memberships <- list(
+  "RLdata" = {
+    records <- read_csv("datasets/RLdata10000.csv.gz")
+    records$ent_id
+  }, 
+  "cora" = {
+    records <- read_csv("datasets/cora.arff.gz", skip = 18, 
+                        col_names = c("authors", "volume", "title", "institution", 
+                                      "venue", "address", "publisher", "year", 
+                                      "pages", "editor", "note", "month", "UID"))
+    records$UID
+  },
+  "nltcs" = {
+    records <- read_csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
+    records$SEQ
+  },
+  "rest" = {
+    records <- read_csv("datasets/fz-nophone.arff.gz", skip = 10, 
+                        col_names = c("name", "addr", "city", "type", "UID"))
+    records$UID
+  }
+)
+
+theme_set(theme_bw())# + theme(text = element_text(size = 8)))
+
+plt.width <- 6.524375
+plt.height <- 1.63109375
+
+plan(multisession)
+results <- future_lapply(expts, function(expt) {
+  result <- tryCatch(readRDS(expt$path), error = function(e) NULL)
+  if (is.null(result)) return(NULL)
+  data.name <- expt$data.name
+  model <- expt$model
+  true_membership <- true_memberships[[data.name]]
+  true_pairs <- membership_to_pairs(true_membership)
+  record_ids <- seq_along(true_membership) # they were defined this way in all expts
+  message(paste("Working on experiment for dataset", data.name, "with method", method))
+  if (inherits(result, "ExchangERFit")) {
+    links <- result@history$links
+  } else if (inherits(result, "BDDFit")) {
+    links <- BDD::complete_links_samples(result, all_rec_ids = record_ids)
+  } else {
+    stop("result is of unrecognized type")
+  }
+  
+  # Evaluate 100 samples from the chain. Don't use entire chain, as it takes too long
+  sample_idx <- sample.int(nrow(links), size = 100, replace = FALSE)
+  measures <- apply(links[sample_idx,], 1, function(pred_membership) {
+    pred_pairs <- membership_to_pairs(pred_membership)
+    c(
+      f1_score = f_measure_pairs(true_pairs, pred_pairs),
+      precision = precision_pairs(true_pairs, pred_pairs),
+      recall = recall_pairs(true_pairs, pred_pairs)
+    )
+  })
+  tibble(data.name = rep_len(data.name, length(measures)), 
+         model = rep_len(model, length(measures)), 
+         measure = rep_len(c("F1 score", "Precision", "Recall"), length(measures)), 
+         value = as.vector(measures))
+})
+
+results <- bind_rows(results)
+
+results$model <- factor(results$model, levels = c("Ours", "blink", "Sadinle"))
+results$measure <- factor(results$measure, levels = c("Precision", "Recall", "F1 score"))
+results$data.name <- factor(results$data.name, levels = c("RLdata", "nltcs", "cora", "rest"))
+
+results <- results %>% 
+  group_by(data.name, model, measure) %>%
+  point_interval(.interval = qi) %>% 
+  mutate(latex_expr = paste0("\\uncertain{", 
+                             formatC(value, digits=3, format="f"), "}{", 
+                             formatC(.lower, digits=3, format="f"), "}{", 
+                             formatC(.upper, digits=3, format="f"), "}")) 
+write_csv(results, "evaluate_models.csv")
+
+ggplot(results, aes(y = data.name, x = value, xmin = .lower, xmax = .upper, color = model)) + 
+  facet_grid(.~measure, scales = "free_x") + 
+  geom_pointinterval(size = 0, position = position_dodge(-0.5)) + 
+  scale_y_discrete(limits=rev) +
+  labs(x = "Measure", y = "Data set", color = "Model") + 
+  theme(legend.position=c("top"), legend.key.height = unit(8,"points"), legend.margin=margin(c(1,1,1,1)))
+ggsave("plot_models.pdf", width = plt.width, height = plt.height, units = "in", scale = 1.2)
