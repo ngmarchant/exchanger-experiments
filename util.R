@@ -1,63 +1,6 @@
 library(comparator)  # Contains normalized Levenshtein distance function
 library(methods)
 
-setClass("CustomStringComparator", contains = c("StringComparator"), 
-         slots = c(
-           custom_fn = "function"
-         ),
-         prototype = structure(
-           .Data = function(x, y, ...) elementwise(sys.function(), x, y, ...),
-           custom_fn = BinaryComp(),
-           symmetric = TRUE,
-           distance = TRUE,
-           similarity = FALSE,
-           tri_inequal = FALSE
-         ), 
-         validity = function(object) {
-           errs <- character()
-           if (object@tri_inequal & (!object@distance | !object@symmetric | object@similarity))
-             errs <- c(errs, "`tri_inequal` must be FALSE")
-           ifelse(length(errs) == 0, TRUE, errs)
-         })
-
-
-CustomStringComparator <- function(custom_fn, symmetric, distance, similarity, 
-                                   tri_inequal) {
-  arguments <- c(as.list(environment()))
-  do.call("new", append("CustomStringComparator", arguments))
-}
-
-#' @describeIn elementwise Specialization for [`CustomStringComparator`] where `x` and 
-#' `y` are vectors of strings to compare.
-setMethod(elementwise, signature = c(comparator = "CustomStringComparator", x = "vector", y = "vector"), 
-          function(comparator, x, y, ...) {
-            comparator@custom_fn(x, y)
-          }
-)
-
-
-#' @describeIn pairwise Specialization for [`CustomStringComparator`] where `x` and `y` 
-#' are vectors of strings to compare.
-setMethod(pairwise, signature = c(comparator = "CustomStringComparator", x = "vector", y = "vector"), 
-          function(comparator, x, y, return_matrix, ...) {
-            comb <- expand.grid(x = x, y = y, stringsAsFactors = FALSE, KEEP.OUT.ATTRS = FALSE)
-            scores <- comparator@custom_fn(comb$x, comb$y)
-            dim(scores) <- c(length(x), length(y))
-            
-            if (!return_matrix) scores <- as.PairwiseMatrix(scores)
-            scores
-          }
-)
-
-#' @describeIn pairwise Specialization for [`CustomStringComparator`] where `x` is a 
-#' vector of strings to compare among themselves.
-setMethod(pairwise, signature = c(comparator = "CustomStringComparator", x = "vector", y = "NULL"), 
-          function(comparator, x, y, return_matrix, ...) {
-            if (!return_matrix) warning("`return_matrix = FALSE` is not supported")
-            pairwise(comparator, x, x, return_matrix)
-          }
-)
-
 #' Checks whether y is an abbreviation of x
 #' 
 #' TODO
