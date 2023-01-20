@@ -30,4 +30,4 @@ attr_params <- c(
 model <- exchanger(records, attr_params, clust_prior, rec_id_colname='rec_id')
 
 expt_name <- paste0("RLdata10000_blink_", gsub("[ :]", "_", date()))
-run_ours(expt_name, model, true_membership, n_samples = 9000, burnin_interval = 10000)
+run_ours(expt_name, model, true_membership, n_samples = 10000, burnin_interval = 100000)

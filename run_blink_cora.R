@@ -35,4 +35,4 @@ attr_params <- c(
 model <- exchanger(records, attr_params, clust_prior)
 
 expt_name <- paste0("cora_blink_", gsub("[ :]", "_", date()))
-run_ours(expt_name, model, true_membership, n_samples = 9000, burnin_interval = 10000)
+run_ours(expt_name, model, true_membership, n_samples = 10000, burnin_interval = 100000)
