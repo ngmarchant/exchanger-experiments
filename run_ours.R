@@ -23,7 +23,7 @@ run_ours <- function(expt_name, model, true_membership,
   # Run inference
   result <- run_inference(model, n_samples, burnin_interval = burnin_interval, 
                           thin_interval = thin_interval)
-  save(result, file = paste0("results/", expt_name, "_result.Rdata"))
+  saveRDS(result, file = paste0("results/", expt_name, "_result.rds"))
   
   rec_ids <- result@state@rec_ids
   n_records <- length(rec_ids)
@@ -49,7 +49,7 @@ run_ours <- function(expt_name, model, true_membership,
             n_linked_ents = result@history$n_linked_ents) %>% 
     ggplot(aes(x = iteration, y = n_linked_ents)) + geom_line() + 
     labs(x = "Iteration", y = "# linked entities")
-  ggsave(filename=paste0("results/", expt_name, "-trace-num-entities.png"), 
+  ggsave(filename=paste0("results/", expt_name, "-trace-num-entities.pdf"), 
          height = plotHeight, width = plotWidth)
   
   bind_cols(iteration = it, 
@@ -58,7 +58,7 @@ run_ours <- function(expt_name, model, true_membership,
     ggplot(aes(x = iteration, y = percDistorted)) + 
     geom_line(aes(colour = attribute, linetype = attribute)) + 
     labs(x = "Iteration", y = "% distorted", col = "Attribute", linetype = "Attribute")
-  ggsave(filename=paste0("results/", expt_name, "-trace-distortion.png"), 
+  ggsave(filename=paste0("results/", expt_name, "-trace-distortion.pdf"), 
          height = plotHeight, width = plotWidth)
   
   if (hasName(result@history, "clust_params")) {
@@ -69,13 +69,13 @@ run_ours <- function(expt_name, model, true_membership,
       geom_line() + facet_grid(clust.param~., scales = "free_y") + 
       xlab("Iteration") + ylab("Value") + 
       ggtitle("Trace plot: clustering hyperparameters")
-    ggsave(filename=paste0("results/", expt_name, "-trace-clust-params.png"), 
+    ggsave(filename=paste0("results/", expt_name, "-trace-clust-params.pdf"), 
            height = plotHeight, width = plotWidth)
   }
   
   # Posterior distribution over number of unique entities
   qplot(result@history$n_linked_ents, geom = "histogram") + 
     xlab("Population size") + ylab("Frequency")
-  ggsave(filename=paste0("results/", expt_name, "-hist-num-entities.png"), 
+  ggsave(filename=paste0("results/", expt_name, "-hist-num-entities.pdf"), 
          height = plotHeight, width = plotWidth)
 }
