@@ -39,13 +39,13 @@ message("Number of pairs:", nrow(pairs))
 
 # this one is the one I'd use
 lambda <- list(
-  SEX = c(0),
-  DOB_DAY = c(0),
-  DOB_MONTH = c(0),
-  DOB_YEAR = c(0),
-  REGOFF = c(0)
+  SEX = c(0.95),
+  DOB_DAY = c(0.95),
+  DOB_MONTH = c(0.95),
+  DOB_YEAR = c(0.95),
+  REGOFF = c(0.95)
 )
 
 model <- BDD(pairs, lambda, id_cols = c("ID.x", "ID.y"))
-run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 1000, 
-            burnin_interval = 1000)
+run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 10000, 
+            burnin_interval = 100000)

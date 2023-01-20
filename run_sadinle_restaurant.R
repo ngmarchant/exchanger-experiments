@@ -26,8 +26,8 @@ scoring_fns <- list(
 )
 
 scoring_breaks <- list(
-  name = c(-Inf,0.05,0.1,0.3,0.4,Inf),
-  addr = c(-Inf,0.05,0.1,0.3,0.4,Inf),
+  name = c(-Inf,.1,.2,.3,.4,Inf),
+  addr = c(-Inf,.1,.2,.3,.4,Inf),
   city = c(-Inf,0,Inf),
   type = c(-Inf,0,Inf)
 )
@@ -41,13 +41,13 @@ pairs <- pairs_all(records$ID) %>%
 message("Number of pairs: ", nrow(pairs))
 
 lambda <- list(
-  name = rep(0, 4),
-  addr = rep(0, 4),
-  city = c(0),
-  type = c(0)
+  name = rep(0.95, 4),
+  addr = rep(0.95, 4),
+  city = c(0.95),
+  type = c(0.95)
 )
 
-criterion1 <- (pairs$name < 4) & (pairs$addr < 4)
+criterion1 <- (pairs$name < 3) & (pairs$addr < 3)
 criterion1[is.na(criterion1)] <- TRUE # don't drop if either attribute is missing
 
 pairs[['candidate']] <- criterion1 # FALSE for pairs that are definite non-matches a-priori
@@ -55,5 +55,5 @@ pairs[['candidate']] <- criterion1 # FALSE for pairs that are definite non-match
 message("Number of candidate matching pairs: ", sum(pairs$candidate))
 
 model <- BDD(pairs, lambda, id_cols = c("ID.x", "ID.y"), candidate_col = "candidate")
-run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 1000, 
-            burnin_interval = 1000)
+run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 10000, 
+            burnin_interval = 100000)

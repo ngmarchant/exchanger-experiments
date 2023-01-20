@@ -21,8 +21,8 @@ scoring_fns <- list(
 )
 
 scoring_breaks <- list(
-  fname_c1 = c(-Inf,.05,.1,.3,.5,Inf),
-  lname_c1 = c(-Inf,.05,.1,.3,.5,Inf),
+  fname_c1 = c(-Inf,.1,.2,.3,.5,Inf),
+  lname_c1 = c(-Inf,.1,.2,.3,.5,Inf),
   by = c(-Inf,0,Inf),
   bm = c(-Inf,0,Inf),
   bd = c(-Inf,0,Inf)
@@ -38,14 +38,14 @@ pairs <- records %>%
 message("Number of pairs:", nrow(pairs))
 
 lambda <- list(
-  fname_c1 = rep(0, 4),
-  lname_c1 = rep(0, 4),
-  by = rep(0),
-  bm = rep(0),
-  bd = rep(0)
+  fname_c1 = rep(0.95, 4),
+  lname_c1 = rep(0.95, 4),
+  by = rep(0.95),
+  bm = rep(0.95),
+  bd = rep(0.95)
 )
 
-criterion1 <- (pairs$fname_c1 < 4) & (pairs$lname_c1 < 4)
+criterion1 <- (pairs$fname_c1 < 3) & (pairs$lname_c1 < 3)
 criterion1[is.na(criterion1)] <- TRUE # don't drop if either attribute is missing
 criterion2 <- TRUE
 #criterion2 <- pairs$by < 2
@@ -56,5 +56,5 @@ pairs[['candidate']] <- (criterion1 & criterion2) # FALSE for pairs that are def
 message("Number of candidate matching pairs:", sum(pairs$candidate))
 
 model <- BDD(pairs, lambda, id_cols = c("rec_id.x", "rec_id.y"), candidate_col = "candidate")
-run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 1000, 
-            burnin_interval = 1000)
+run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 10000, 
+            burnin_interval = 100000)

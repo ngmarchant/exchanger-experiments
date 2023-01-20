@@ -27,10 +27,10 @@ scoring_fns <- list(
 )
 
 scoring_breaks <- list(
-  authors = c(-Inf,0.05,0.1,0.3,0.5,Inf),
-  title = c(-Inf,0.05,0.1,0.3,0.5,Inf),
-  venue = c(-Inf,0.05,0.1,0.3,0.5,Inf),
-  year = c(-Inf,0.05,0.1,0.3,0.5,Inf)
+  authors = c(-Inf,0.1,0.2,0.3,0.5,Inf),
+  title = c(-Inf,0.1,0.2,0.3,0.5,Inf),
+  venue = c(-Inf,0.1,0.2,0.3,0.5,Inf),
+  year = c(-Inf,0.1,0.2,0.3,0.5,Inf)
 )
 
 system.time(
@@ -44,13 +44,13 @@ message("Number of pairs:", nrow(pairs))
 
 # this one is the one I'd use
 lambda <- list(
-  authors = c(0.0,0.0,0.0,0.0),
-  title = c(0.0,0.0,0.0,0.0),
-  venue = c(0.0,0.0,0.0,0.0),
-  year = c(0.0,0.0,0.0,0.0)
+  authors = rep(0.95, 4),
+  title = rep(0.95, 4),
+  venue = rep(0.95, 4),
+  year = rep(0.95, 4)
 )
 
-criterion1 <- (pairs$authors < 4) & (pairs$title < 4) & (pairs$venue < 5) & (pairs$year < 5)
+criterion1 <- (pairs$authors < 3) & (pairs$title < 3) & (pairs$venue < 4) & (pairs$year < 4)
 criterion1[is.na(criterion1)] <- TRUE # don't drop if either attribute is missing
 
 pairs[['candidate']] <- criterion1 # FALSE for pairs that are definite non-matches a-priori
@@ -58,5 +58,5 @@ pairs[['candidate']] <- criterion1 # FALSE for pairs that are definite non-match
 message("Number of candidate matching pairs:", sum(pairs$candidate))
 
 model <- BDD(pairs, lambda, id_cols = c("ID.x", "ID.y"), candidate_col = "candidate")
-run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 1000, 
-            burnin_interval = 1000)
+run_sadinle(expt_name, model, rec_ids, true_membership, n_samples = 10000, 
+            burnin_interval = 100000)
