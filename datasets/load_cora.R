@@ -1,7 +1,7 @@
-library(readr)
+#library(readr)
 library(dplyr)
-records <- read_csv("cora.arff.gz", skip = 18, 
-                    col_names = c("authors", "volume", "title", "institution", 
+records <- read.csv("cora.arff.gz", skip = 18, 
+                    col.names = c("authors", "volume", "title", "institution", 
                                   "venue", "address", "publisher", "year", 
                                   "pages", "editor", "note", "month", "UID"))
 records <- records %>% select(-c("address", "note"))
