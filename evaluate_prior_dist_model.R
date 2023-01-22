@@ -131,11 +131,11 @@ results <- results %>%
                              formatC(.upper, digits=3, format="f"), "}")) 
 write_csv(results, "evaluate_prior_dist_model.csv")
 
-ggplot(results, aes(y = value, x = prior, ymin = .lower, ymax = .upper, color = dist.model)) + 
+ggplot(results, aes(y = value, x = prior, ymin = .lower, ymax = .upper, color = dist.model, shape = dist.model)) + 
   facet_wrap(data.name~measure, scales = "free_y", nrow = 4, ncol = 3, strip.position = "top") +
   geom_pointinterval(size = 0, position = position_dodge(0.5)) + 
   #scale_y_discrete(limits=rev) +
   scale_y_continuous(expand=expansion(mult=c(0.2,0.2))) + 
-  labs(x = "Linkage prior", y = "Measure value", color = "Distortion model") + 
+  labs(x = "Linkage prior", y = "Measure value", color = "Distortion model", shape = "Distortion model") + 
   theme(legend.position="top", axis.text.x = element_text(angle = 45, hjust = 1))
 ggsave("plot_prior_dist_model.pdf", width = plot.width, height = plot.height, units = "cm")
