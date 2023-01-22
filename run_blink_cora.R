@@ -27,7 +27,7 @@ attr_params <- c(
   "venue" = Attribute(transform_dist_fn(dist_2, 5.0, scaling_factor = 10.0), 
                       distort_prob_prior = distort_prior, 
                       exclude_entity_value = FALSE),
-  "year" = Attribute(transform_dist_fn(Levenshtein(), 5.0, scaling_factor = 10.0), 
+  "year" = Attribute(transform_dist_fn(Levenshtein(normalize=TRUE), 5.0, scaling_factor = 10.0), 
                      distort_prob_prior = distort_prior, 
                      exclude_entity_value = FALSE)
 )
