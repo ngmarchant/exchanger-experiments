@@ -85,7 +85,7 @@ Abbreviation <- function(abbrev_weight = 0.1, symmetric = FALSE) {
 
 #' Returns the path of the RDS file for an experiment with a given prefix
 get_result_rds <- function(prefix) {
-  files <- list.files(pattern = paste0(prefix, "_[[:alnum:]_]+_result.rds"), recursive=TRUE)
+  files <- list.files(pattern = paste0(prefix, "[[:alnum:]_]+_result.rds"), recursive=TRUE)
   if (length(files) == 0)
     stop("no rds file found for ", prefix)
   if (length(files) > 1) 
