@@ -10,7 +10,7 @@
 library(tidyverse)
 library(exchanger)
 library(clevr)           # pairwise evaluation measures
-library(tidybayes)       # provides geom_pointinterval
+library(ggdist)          # provides geom_pointinterval
 library(coda)            # for manipulating 'mcmc' objects
 library(future)
 library(future.apply)    # parallelization

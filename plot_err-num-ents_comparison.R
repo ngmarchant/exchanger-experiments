@@ -8,7 +8,7 @@
 
 library(tidyverse)
 library(exchanger) 
-library(tidybayes)       # provides geom_pointinterval
+library(ggdist)          # provides geom_pointinterval
 library(egg)             # provides ggarange
 library(coda)            # for manipulating 'mcmc' objects
 source("util.R")         # contains definition of "get_result_rds"
