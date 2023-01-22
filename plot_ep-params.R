@@ -30,8 +30,8 @@ expts <- list(
 
 theme_set(theme_bw())# + theme(text = element_text(size = 8)))
 
-plt.width <- 6.524375
-plt.height <- 2.93596875
+plt.width <- 0.9*6.524375
+plt.height <- 0.9*2.93596875
 
 log_breaks = function(maj, radix=10, nminor=radix) {
   function(x) {
@@ -77,7 +77,8 @@ coupon.plt <- results %>%
   facet_grid(cols = vars(prior), rows = vars(clust.param), scales = "free") + 
   geom_pointinterval(scale=1, interval_size_range = c(0.2, 1.2), position=position_dodge(width = 0.9), fatten_point = 1.4) + 
   scale_y_continuous(trans = 'log10', breaks = log_breaks(TRUE), minor_breaks = log_breaks(FALSE, nminor=5)) +
-  labs(x = NULL, y = NULL)
+  labs(x = NULL, y = NULL) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ewens.plt <- results %>% 
   filter(prior == 'Ewens') %>%
@@ -87,7 +88,8 @@ ewens.plt <- results %>%
   facet_grid(cols = vars(prior), rows = vars(clust.param), scales = "free") + 
   geom_pointinterval(scale=1, interval_size_range = c(0.2, 1.2), position=position_dodge(width = 0.9), fatten_point = 1.4) + 
   scale_y_continuous(trans = 'log10', breaks = log_breaks(TRUE), minor_breaks = log_breaks(FALSE, nminor=5)) +
-  labs(x = "Data set", y = NULL)
+  labs(x = "Data set", y = NULL) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 py.plt <- results %>% 
   filter(prior == 'PY') %>%
@@ -97,7 +99,8 @@ py.plt <- results %>%
   facet_grid(cols = vars(prior), rows = vars(clust.param), scales = "free") + 
   geom_pointinterval(scale=1, interval_size_range = c(0.2, 1.2), position=position_dodge(width = 0.9), fatten_point = 1.4) + 
   scale_y_continuous(trans = 'log10', minor_breaks = log_breaks(FALSE, nminor=2)) +
-  labs(x = NULL, y = NULL)
+  labs(x = NULL, y = NULL) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 g <- ggarrange(py.plt, ewens.plt, coupon.plt, ncol=3)
-ggsave("plot_ep-params.pdf", plot = g, width = plt.width, height = plt.height, scale=1.4)
+ggsave("plot_ep-params.pdf", plot = g, width = plt.width, height = plt.height, units = "in", scale = 1.2)
