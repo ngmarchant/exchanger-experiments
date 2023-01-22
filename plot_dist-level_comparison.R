@@ -55,9 +55,9 @@ results$data.name <- factor(results$data.name, c("RLdata", "nltcs", "cora", "res
 results %>% 
   group_by(data.name, prior, attribute.name, dist.model) %>% 
   point_interval(.interval = qi) %>%
-  ggplot(aes(y = attribute.name, x = perc.distortion, xmin = .lower, xmax = .upper, color=dist.model)) + 
+  ggplot(aes(y = attribute.name, x = perc.distortion, xmin = .lower, xmax = .upper, color=dist.model, shape=dist.model)) + 
     facet_grid(data.name~., scales = "free_y") + 
-    geom_pointinterval(interval_size = 0.5, point_size = 0.5, position=position_dodge(-0.5)) +
-    labs(y = "Attribute", x = "Distortion level (%)", color = "Distortion model") + 
+    geom_pointinterval(interval_size = 0.5, point_size = 1.0, position=position_dodge(-0.5)) +
+    labs(y = "Attribute", x = "Distortion level (%)", color = "Distortion model", shape = "Distortion model") + 
     theme(legend.position="top", legend.key.height = unit(10, "points"), legend.margin=margin())
 ggsave("plot_dist-level_comparison.pdf", width = plt.width, height = plt.height, scale=1.4)
