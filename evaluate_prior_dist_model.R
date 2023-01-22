@@ -53,23 +53,25 @@ expts <- list(
 
 true_memberships <- list(
   "RLdata" = {
-    records <- read_csv("datasets/RLdata10000.csv.gz")
+    records <- read.csv("datasets/RLdata10000.csv.gz")
     records$ent_id
   }, 
   "cora" = {
-    records <- read_csv("datasets/cora.arff.gz", skip = 18, 
-                        col_names = c("authors", "volume", "title", "institution", 
+    records <- read.csv("datasets/cora.arff.gz", skip = 18, quote = "\"'",
+                        strip.white = TRUE, header = FALSE,
+                        col.names = c("authors", "volume", "title", "institution", 
                                       "venue", "address", "publisher", "year", 
                                       "pages", "editor", "note", "month", "UID"))
     records$UID
   },
   "nltcs" = {
-    records <- read_csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
+    records <- read.csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
     records$SEQ
   },
   "rest" = {
-    records <- read_csv("datasets/fz-nophone.arff.gz", skip = 10, 
-                        col_names = c("name", "addr", "city", "type", "UID"))
+    records <- read.csv("datasets/fz-nophone.arff.gz", skip = 10, quote = "\"'",
+                        strip.white = TRUE, header = FALSE,
+                        col.names = c("name", "addr", "city", "type", "UID"))
     records$UID
   }
 )
@@ -89,11 +91,9 @@ results <- future_lapply(expts, function(expt) {
   true_membership <- true_memberships[[data.name]]
   true_pairs <- membership_to_pairs(true_membership)
   record_ids <- seq_along(true_membership) # they were defined this way in all expts
-  message(paste("Working on experiment for dataset", data.name, "with method", method))
+  message(paste("Working on experiment for dataset", data.name, "with prior", prior, "and distortion model", dist.model))
   if (inherits(result, "ExchangERFit")) {
     links <- result@history$links
-  } else if (inherits(result, "BDDFit")) {
-    links <- BDD::complete_links_samples(result, all_rec_ids = record_ids)
   } else {
     stop("result is of unrecognized type")
   }

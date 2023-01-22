@@ -35,23 +35,25 @@ expts <- list(
 
 true_memberships <- list(
   "RLdata" = {
-    records <- read_csv("datasets/RLdata10000.csv.gz")
+    records <- read.csv("datasets/RLdata10000.csv.gz")
     records$ent_id
   }, 
   "cora" = {
-    records <- read_csv("datasets/cora.arff.gz", skip = 18, 
-                        col_names = c("authors", "volume", "title", "institution", 
+    records <- read.csv("datasets/cora.arff.gz", skip = 18, quote = "\"'",
+                        strip.white = TRUE, header = FALSE,
+                        col.names = c("authors", "volume", "title", "institution", 
                                       "venue", "address", "publisher", "year", 
                                       "pages", "editor", "note", "month", "UID"))
     records$UID
   },
   "nltcs" = {
-    records <- read_csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
+    records <- read.csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
     records$SEQ
   },
   "rest" = {
-    records <- read_csv("datasets/fz-nophone.arff.gz", skip = 10, 
-                        col_names = c("name", "addr", "city", "type", "UID"))
+    records <- read.csv("datasets/fz-nophone.arff.gz", skip = 10, quote = "\"'",
+                        strip.white = TRUE, header = FALSE,
+                        col.names = c("name", "addr", "city", "type", "UID"))
     records$UID
   }
 )
