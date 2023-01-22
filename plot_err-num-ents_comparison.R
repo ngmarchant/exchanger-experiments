@@ -34,31 +34,33 @@ expts <- list(
 
 true.num.ents <- list(
   "RLdata" = {
-    records <- read_csv("datasets/RLdata10000.csv.gz")
+    records <- read.csv("datasets/RLdata10000.csv.gz")
     length(unique(records$ent_id))
   }, 
   "cora" = {
-    records <- read_csv("datasets/cora.arff.gz", skip = 18, 
-                        col_names = c("authors", "volume", "title", "institution", 
+    records <- read.csv("datasets/cora.arff.gz", skip = 18, quote = "\"'",
+                        strip.white = TRUE, header = FALSE,
+                        col.names = c("authors", "volume", "title", "institution", 
                                       "venue", "address", "publisher", "year", 
                                       "pages", "editor", "note", "month", "UID"))
     length(unique(records$UID))
   },
   "nltcs" = {
-    records <- read_csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
+    records <- read.csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
     length(unique(records$SEQ))
   },
   "rest" = {
-    records <- read_csv("datasets/fz-nophone.arff.gz", skip = 10, 
-                        col_names = c("name", "addr", "city", "type", "UID"))
+    records <- read.csv("datasets/fz-nophone.arff.gz", skip = 10, quote = "\"'",
+                        strip.white = TRUE, header = FALSE,
+                        col.names = c("name", "addr", "city", "type", "UID"))
     length(unique(records$UID))
   }
 )
 
 theme_set(theme_bw())# + theme(text = element_text(size = 8)))
 
-plt.width <- 3.2621875
-plt.height <- 0.45 * plt.width
+plt.width <- 0.9*6.524375
+plt.height <- 0.5*2.93596875
 
 results <- lapply(expts, function(expt) {
   result <- tryCatch(readRDS(expt$path), error = function(e) NULL)
@@ -78,9 +80,10 @@ results$data.name <- factor(results$data.name, c("RLdata", "nltcs", "cora", "res
 results %>% 
   group_by(data.name, prior) %>% 
   point_interval(.interval = qi) %>%
-  ggplot(aes(y = data.name, x = err.num.ents, xmin = .lower, xmax = .upper, color=prior)) + 
-  geom_pointinterval(interval_size = 0.5, point_size = 0.5, position=position_dodge(-0.7)) +  
-  scale_y_discrete(limits=rev) +
-  labs(y = "Data set", x = "Relative error (%)", color = "Prior") + 
-  theme(legend.position="top", legend.margin=margin())
-ggsave("plot_err-num-ents_comparison.pdf", width = plt.width, height = plt.height, scale=1.4)
+  ggplot(aes(y = prior, x = err.num.ents, xmin = .lower, xmax = .upper)) + 
+    facet_grid(.~data.name, scales = "free") + 
+    geom_pointinterval(interval_size = 0.5, point_size = 1.0, position=position_dodge(-0.7)) +  
+    scale_y_discrete(limits=rev) +
+    labs(y = "Prior", x = "Relative error (%)") + 
+    theme(legend.position="top", legend.margin=margin())
+ggsave("plot_err-num-ents_comparison.pdf", width = plt.width, height = plt.height, units = "in", scale=1.2)
