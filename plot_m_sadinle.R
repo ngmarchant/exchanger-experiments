@@ -1,9 +1,8 @@
-## This script generates  Sadinle 
-## (2014).
-## 
+## This script generates a plot of the posterior m-probabilities for the
+## baseline model by Sadinle (2014).
+##
 ## Output:
-##   plot_m_sadinle.pdf`: Geweke plot for a selection of model 
-##   variables.
+##   plot_m_sadinle.pdf`
 
 library(exchanger)
 library(BDD)
