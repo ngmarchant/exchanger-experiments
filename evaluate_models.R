@@ -18,6 +18,7 @@ library(future)
 library(future.apply)    # parallelization
 library(dplyr)
 library(ggplot2)
+library(purrr)
 source("util.R")         # contains definition of "get_result_rds"
 
 expts <- expand.grid(
@@ -38,7 +39,7 @@ expts['path'] <- {
 }
 
 # Convert Data Frame to list of lists
-expts <- lapply(split(expts, seq_len(nrow(expts))), as.list)
+expts <- transpose(expts)
 
 true_memberships <- list(
   "RLdata" = {

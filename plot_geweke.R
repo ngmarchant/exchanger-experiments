@@ -16,6 +16,7 @@ library(latex2exp)       # for variable names in plot
 library(ggplot2)
 library(dplyr)
 library(stringr)
+library(purrr)
 source("util.R")         # contains definition of "get_result_rds"
 
 # Entries for our model
@@ -52,6 +53,9 @@ expts['path'] <- {
   prefixes <- apply(expts_mod, 1, function(row) paste(row[nzchar(row)], collapse = "_"))
   sapply(prefixes, get_result_rds)
 }
+
+# Convert Data Frame to list of lists
+expts <- transpose(expts)
 
 theme_set(theme_bw())# + theme(text = element_text(size = 8)))
 
@@ -132,9 +136,6 @@ geweke_sadinle <- function(result) {
   data.frame(variable = c(m_names, u_names, "$E$"),
              geweke = c(m, u, n_linked_ents))
 }
-
-# Convert Data Frame to list of lists
-expts <- lapply(split(expts, seq_len(nrow(expts))), as.list)
 
 plan(sequential)
 future_lapply(expts, function(expt) {

@@ -15,6 +15,7 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(stringr)
+library(purrr)
 source("util.R")         # contains definition of "get_result_rds"
 
 expts <- expand.grid(
@@ -35,7 +36,7 @@ expts['path'] <- {
 }
 
 # Convert Data Frame to list of lists
-expts <- lapply(split(expts, seq_len(nrow(expts))), as.list)
+expts <- transpose(expts)
 
 plot.width <- 14.5
 plot.height <- 16

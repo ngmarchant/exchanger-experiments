@@ -54,6 +54,9 @@ expts['path'] <- {
   sapply(prefixes, get_result_rds)
 }
 
+# Convert Data Frame to list of lists
+expts <- transpose(expts)
+
 true_memberships <- list(
   "RLdata" = {
     records <- read.csv("datasets/RLdata10000.csv.gz")
@@ -185,9 +188,6 @@ trace_sadinle <- function(result) {
 
   pivot_longer(as_tibble(diag), !iteration)
 }
-
-# Convert Data Frame to list of lists
-expts <- lapply(split(expts, seq_len(nrow(expts))), as.list)
 
 plan(sequential)
 future_lapply(expts, function(expt) {
