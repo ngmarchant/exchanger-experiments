@@ -8,30 +8,37 @@
 ##   * `evaluate_models.csv`: A CSV file containing the results
 ##   * `plot_models.pdf`: A plot visualizing the results
 
-library(tidyverse)
-library(exchanger) 
+library(exchanger)
+library(BDD)
 library(clevr)
 library(ggdist)          # provides `geom_pointinterval` and `point_interval`
 library(egg)             # provides ggarange
 library(coda)            # for manipulating 'mcmc' objects
 library(future)
 library(future.apply)    # parallelization
+library(dplyr)
+library(ggplot2)
 source("util.R")         # contains definition of "get_result_rds"
 
-expts <- list(
-  list(data.name = "RLdata", path = get_result_rds("RLdata10000_blink"), model = "blink"),
-  list(data.name = "nltcs", path = get_result_rds("nltcs_blink"), model = "blink"),
-  list(data.name = "cora", path = get_result_rds("cora_blink"), model = "blink"),
-  list(data.name = "rest", path = get_result_rds("restaurant_blink"), model = "blink"),
-  list(data.name = "RLdata", path = get_result_rds("RLdata10000_sadinle"), model = "Sadinle"),
-  list(data.name = "nltcs", path = get_result_rds("nltcs_sadinle"), model = "Sadinle"),
-  list(data.name = "cora", path = get_result_rds("cora_sadinle"), model = "Sadinle"),
-  list(data.name = "rest", path = get_result_rds("restaurant_sadinle"), model = "Sadinle"),
-  list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_coupon"), model = "Ours"),
-  list(data.name = "nltcs", path = get_result_rds("nltcs_ours_coupon"), model = "Ours"),
-  list(data.name = "cora", path = get_result_rds("cora_ours_coupon"), model = "Ours"),
-  list(data.name = "rest", path = get_result_rds("restaurant_ours_coupon"), model = "Ours")
+expts <- expand.grid(
+  data.name = c("RLdata10000", "nltcs", "cora", "rest"),
+  model = c("Ours", "blink", "Sadinle"),
+  KEEP.OUT.ATTRS = FALSE,
+  stringsAsFactors = FALSE
 )
+
+# Add path to RDS file
+expts['path'] <- {
+  expts_mod <- mutate(expts,
+    data.name = recode(data.name, rest = "restaurant"),
+    model = recode(model, Ours = "ours_coupon", Sadinle = "sadinle0.95_"),
+  )
+  prefixes <- apply(expts_mod, 1, function(row) paste(row[nzchar(row)], collapse = "_"))
+  sapply(prefixes, get_result_rds)
+}
+
+# Convert Data Frame to list of lists
+expts <- lapply(split(expts, seq_len(nrow(expts))), as.list)
 
 true_memberships <- list(
   "RLdata" = {
@@ -72,7 +79,7 @@ results <- future_lapply(expts, function(expt) {
   true_membership <- true_memberships[[data.name]]
   true_pairs <- membership_to_pairs(true_membership)
   record_ids <- seq_along(true_membership) # they were defined this way in all expts
-  message(paste("Working on experiment for dataset", data.name, "with method", method))
+  message(paste("Working on experiment for dataset", data.name, "with model", expt$model))
   if (inherits(result, "ExchangERFit")) {
     links <- result@history$links
   } else if (inherits(result, "BDDFit")) {
@@ -80,7 +87,7 @@ results <- future_lapply(expts, function(expt) {
   } else {
     stop("result is of unrecognized type")
   }
-  
+
   # Evaluate 100 samples from the chain. Don't use entire chain, as it takes too long
   sample_idx <- sample.int(nrow(links), size = 100, replace = FALSE)
   measures <- apply(links[sample_idx,], 1, function(pred_membership) {
@@ -91,10 +98,12 @@ results <- future_lapply(expts, function(expt) {
       recall = recall_pairs(true_pairs, pred_pairs)
     )
   })
-  tibble(data.name = rep_len(data.name, length(measures)), 
-         model = rep_len(model, length(measures)), 
-         measure = rep_len(c("F1 score", "Precision", "Recall"), length(measures)), 
-         value = as.vector(measures))
+  tibble(
+    data.name = rep_len(data.name, length(measures)),
+    model = rep_len(model, length(measures)),
+    measure = rep_len(c("F1 score", "Precision", "Recall"), length(measures)),
+    value = as.vector(measures)
+  )
 })
 
 results <- bind_rows(results)
