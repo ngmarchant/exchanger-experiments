@@ -17,7 +17,7 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(purrr)
-source("util.R")         # contains definition of "get_result_rds"
+source("util.R")         # contains definition of `get_result_rds`
 
 # Entries for our model
 expts <- expand.grid(

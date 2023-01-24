@@ -11,7 +11,7 @@ library(exchanger)
 library(ggdist)          # provides geom_pointinterval
 library(egg)             # provides ggarange
 library(coda)            # for manipulating 'mcmc' objects
-source("util.R")         # contains definition of "get_result_rds"
+source("util.R")         # contains definition of `get_result_rds`
 
 expts <- list(
   list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),

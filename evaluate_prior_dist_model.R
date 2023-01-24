@@ -14,7 +14,7 @@ library(ggdist)          # provides geom_pointinterval
 library(coda)            # for manipulating 'mcmc' objects
 library(future)
 library(future.apply)    # parallelization
-source("util.R")         # contains definition of "get_result_rds"
+source("util.R")         # contains definition of `get_result_rds` and `true_memberships`
 
 expts <- list(
   list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),
@@ -49,31 +49,6 @@ expts <- list(
   list(data.name = "nltcs", path = get_result_rds("nltcs_ours_blinkdist_blinkcoupon"), prior = "Coupon", dist.model = "blink"),
   list(data.name = "cora", path = get_result_rds("cora_ours_blinkdist_blinkcoupon"), prior = "Coupon", dist.model = "blink"),
   list(data.name = "rest", path = get_result_rds("restaurant_ours_blinkdist_blinkcoupon"), prior = "Coupon", dist.model = "blink")
-)
-
-true_memberships <- list(
-  "RLdata" = {
-    records <- read.csv("datasets/RLdata10000.csv.gz")
-    records$ent_id
-  }, 
-  "cora" = {
-    records <- read.csv("datasets/cora.arff.gz", skip = 18, quote = "\"'",
-                        strip.white = TRUE, header = FALSE,
-                        col.names = c("authors", "volume", "title", "institution", 
-                                      "venue", "address", "publisher", "year", 
-                                      "pages", "editor", "note", "month", "UID"))
-    records$UID
-  },
-  "nltcs" = {
-    records <- read.csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
-    records$SEQ
-  },
-  "rest" = {
-    records <- read.csv("datasets/fz-nophone.arff.gz", skip = 10, quote = "\"'",
-                        strip.white = TRUE, header = FALSE,
-                        col.names = c("name", "addr", "city", "type", "UID"))
-    records$UID
-  }
 )
 
 theme_set(theme_bw())# + theme(text = element_text(size = 8)))

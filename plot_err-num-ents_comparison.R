@@ -11,7 +11,7 @@ library(exchanger)
 library(ggdist)          # provides geom_pointinterval
 library(egg)             # provides ggarange
 library(coda)            # for manipulating 'mcmc' objects
-source("util.R")         # contains definition of "get_result_rds"
+source("util.R")         # contains definition of `get_result_rds` and `true_memberships`
 
 expts <- list(
   list(data.name = "RLdata", path = get_result_rds("RLdata10000_ours_coupon"), prior = "GenCoupon", dist.model = "Ours"),
@@ -32,30 +32,7 @@ expts <- list(
   list(data.name = "rest", path = get_result_rds("restaurant_ours_blinkcoupon"), prior = "Coupon", dist.model = "Ours")
 )
 
-true.num.ents <- list(
-  "RLdata" = {
-    records <- read.csv("datasets/RLdata10000.csv.gz")
-    length(unique(records$ent_id))
-  }, 
-  "cora" = {
-    records <- read.csv("datasets/cora.arff.gz", skip = 18, quote = "\"'",
-                        strip.white = TRUE, header = FALSE,
-                        col.names = c("authors", "volume", "title", "institution", 
-                                      "venue", "address", "publisher", "year", 
-                                      "pages", "editor", "note", "month", "UID"))
-    length(unique(records$UID))
-  },
-  "nltcs" = {
-    records <- read.csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
-    length(unique(records$SEQ))
-  },
-  "rest" = {
-    records <- read.csv("datasets/fz-nophone.arff.gz", skip = 10, quote = "\"'",
-                        strip.white = TRUE, header = FALSE,
-                        col.names = c("name", "addr", "city", "type", "UID"))
-    length(unique(records$UID))
-  }
-)
+true.num.ents <- sapply(true_memberships, function(memb) length(unique(memb)))
 
 theme_set(theme_bw())# + theme(text = element_text(size = 8)))
 

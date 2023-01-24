@@ -19,7 +19,7 @@ library(future.apply)    # parallelization
 library(dplyr)
 library(ggplot2)
 library(purrr)
-source("util.R")         # contains definition of "get_result_rds"
+source("util.R")         # contains definition of `get_result_rds` and `true_memberships`
 
 expts <- expand.grid(
   data.name = c("RLdata10000", "nltcs", "cora", "rest"),
@@ -40,31 +40,6 @@ expts['path'] <- {
 
 # Convert Data Frame to list of lists
 expts <- transpose(expts)
-
-true_memberships <- list(
-  "RLdata" = {
-    records <- read.csv("datasets/RLdata10000.csv.gz")
-    records$ent_id
-  }, 
-  "cora" = {
-    records <- read.csv("datasets/cora.arff.gz", skip = 18, quote = "\"'",
-                        strip.white = TRUE, header = FALSE,
-                        col.names = c("authors", "volume", "title", "institution", 
-                                      "venue", "address", "publisher", "year", 
-                                      "pages", "editor", "note", "month", "UID"))
-    records$UID
-  },
-  "nltcs" = {
-    records <- read.csv("datasets/proc_nltcs.csv.gz") %>% filter(STATE == 1)
-    records$SEQ
-  },
-  "rest" = {
-    records <- read.csv("datasets/fz-nophone.arff.gz", skip = 10, quote = "\"'",
-                        strip.white = TRUE, header = FALSE,
-                        col.names = c("name", "addr", "city", "type", "UID"))
-    records$UID
-  }
-)
 
 theme_set(theme_bw())# + theme(text = element_text(size = 8)))
 

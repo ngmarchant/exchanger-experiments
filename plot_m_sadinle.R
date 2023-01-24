@@ -16,7 +16,7 @@ library(ggplot2)
 library(tidyr)
 library(stringr)
 library(purrr)
-source("util.R")         # contains definition of "get_result_rds"
+source("util.R")         # contains definition of `get_result_rds`
 
 expts <- expand.grid(
   data.name = c("RLdata10000", "nltcs", "cora", "rest"),
