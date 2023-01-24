@@ -4,7 +4,7 @@ library(purrr)
 library(stringr)
 
 files <- list.files(path = "./synthdata/",
-           pattern = "*_records.csv", full.names = TRUE)
+           pattern = "*_records.csv.gz", full.names = TRUE)
 names(files) <- files
 
 synthdata <- map_dfr(files, ~read_csv(., col_types = cols(.default = "c")), .id = "filename")
@@ -20,4 +20,3 @@ identity.synthdata <- as.integer(synthdata$uid)
 
 synthdata$filename <- NULL
 synthdata$uid <- NULL
-
