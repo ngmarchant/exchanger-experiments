@@ -3,8 +3,9 @@
 This folder contains files required to reproduce the experiments for the 
 following paper:
 
-> N. G. Marchant, B. I. P. Rubinstein and R. C. Steorts. (2021) "Bayesian 
-Graphical Entity Resolution using Exchangeable Random Partition Priors".
+> N. G. Marchant, B. I. P. Rubinstein, R. C. Steorts, "Bayesian Graphical Entity Resolution using Exchangeable Random 
+Partition Priors," _Journal of Survey Statistics and Methodology_, 2023, smac030. DOI: 
+[10.1093/jssam/smac030](https://doi.org/10.1093/jssam/smac030). arXiv: [2301.02962](https://arxiv.org/abs/2301.02962).
 
 ## Data sets
 
