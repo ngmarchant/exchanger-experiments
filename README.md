@@ -8,12 +8,14 @@ Graphical Entity Resolution using Exchangeable Random Partition Priors".
 
 ## Data sets
 
-Three of the four data sets are included in the `datasets` directory:
+Four of the five data sets are included in the `datasets` directory:
 * `rest`: with filename `fz-nophone.arff.gz`. Original [source](https://www.cs.utexas.edu/users/ml/riddle/data/restaurant.tar.gz).
 * `cora`: with filename `cora.arff.gz`. Modified from original [source](https://www.cs.utexas.edu/users/ml/riddle/data/cora.tar.gz) 
   to correct erroneous ground truth labels.
 * `RLdata`: with filename `RLdata10000.csv.gz`. From the [RecordLinkage](https://cran.r-project.org/web/packages/RecordLinkage/) 
   R package.
+* `synthdata`: with filenames matching the pattern `gen_link-conf-mu-*_dist-conf-*_seed-*_exp-num-recs-*_records.csv.gz`. 
+  The Python notebook used to generate the synthetic data is included. 
 
 `nltcs` is available from [NACDA](https://www.icpsr.umich.edu/icpsrweb/NACDA/studies/9681/summary) 
 after signing a data usage agreement. 
@@ -34,8 +36,7 @@ Other dependencies include the following R packages from CRAN:
 * `comparator`
 * `clevr`
 * `tidyverse`
-* `tidybayes`
-* `gridExtra`
+* `ggdist`
 * `egg`
 
 ## R scripts
@@ -63,7 +64,7 @@ following in a terminal:
 Rscript run_<model>_<dataset>.R
 ```
 where `<model>` is defined as above and `<dataset>` can be one of 
-`cora`, `nltcs`, `restaurant`, or `RLdata10000`.
+`cora`, `nltcs`, `restaurant`, `RLdata10000` or `synthdata`.
 
 ## Output of an experiment
 
@@ -78,9 +79,12 @@ model.
 
 After running all experiments, tables and figures can be reproduced as follows:
 
-* Figure 2 can be reproduced by running `plot_err-num_ents_comparison.R` 
-* Table 3 and Figure S4 can be reproduced by running 
+* Figure 3 can be reproduced by running `plot_err-num_ents_comparison.R` 
+* Table 2 and Figure S7 can be reproduced by running 
   `evaluate_prior_dist_model.R`
-* Table 4 can be reproduced by running `evaluate_models.R`
-* Figure 3 can be reproduced by running `plot_dist-level_comparison.R` 
-* Figure S5 can be reproduced by running `plot_ep-params.R`
+* Figure 4 can be reproduced by running `plot_dist-level_comparison.R` 
+* Table 3 can be reproduced by running `evaluate_models.R`
+* Figures S5 and S6 can be reproduced by running `evaluate_synthdata.R`
+* Figure S8 can be reproduced by running `plot_ep-params.R`
+* Figure S9 can be reproduced by running `plot_m_sadinle.R`
+* The diagnostic plots in Appendix G can be reproduced by running `plot_geweke.R` and `plot_trace.R`
