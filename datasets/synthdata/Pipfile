@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+jupyterlab = "==3.4.3"
+numpy = "==1.23.0"
+scipy = "==1.8.1"
+faker = "==13.14.0"
+pandas = "==1.4.3"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
